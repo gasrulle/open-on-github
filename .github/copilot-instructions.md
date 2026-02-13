@@ -129,4 +129,4 @@ No test framework is currently set up. If tests are added:
 - Any new command must be registered in both `package.json` (`contributes.commands`) and `extension.ts` (`activate`).
 - Update `CHANGELOG.md` for every user-facing change.
 - Run `npm run compile` before committing to ensure type checks and lint pass.
-- The VSIX filename follows the pattern `open-on-github-<version>.vsix`.
+- The VSIX filename follows the pattern `open-on-github-scm-<version>.vsix`.

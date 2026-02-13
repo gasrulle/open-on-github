@@ -1,5 +1,5 @@
 {
-    "name": "open-on-github",
+    "name": "open-on-github-scm",
     "displayName": "Open on GitHub",
     "description": "Quickly open your GitHub repository's Code, Pull Requests, and Actions pages directly from the Source Control view.",
     "version": "0.0.1",
@@ -31,6 +31,7 @@
         "pull requests",
         "actions",
         "open on github",
+        "open on github scm",
         "open in github"
     ],
     "activationEvents": [

@@ -1,6 +1,6 @@
 # Open on GitHub
 
-[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/gasrulle.open-on-github)](https://marketplace.visualstudio.com/items?itemName=gasrulle.open-on-github)
+[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/gasrulle.open-on-github-scm)](https://marketplace.visualstudio.com/items?itemName=gasrulle.open-on-github-scm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ![Open on GitHub](resources/hero.png)
