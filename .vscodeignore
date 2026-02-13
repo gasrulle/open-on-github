@@ -1,0 +1,16 @@
+.vscode/**
+node_modules/**
+out/**
+src/**
+scripts/**
+dist/**/*.map
+.gitignore
+.vscodeignore
+esbuild.js
+tsconfig.json
+eslint.config.mjs
+package-lock.json
+**/*.ts
+!dist/extension.js
+*.vsix
+resources/icon.svg

@@ -1,0 +1,110 @@
+{
+    "name": "open-on-github",
+    "displayName": "Open on GitHub",
+    "description": "Quickly open your GitHub repository's Code, Pull Requests, and Actions pages directly from the Source Control view.",
+    "version": "0.0.1",
+    "publisher": "Gasrulle",
+    "icon": "resources/icon.png",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gasrulle/open-on-github"
+    },
+    "homepage": "https://github.com/gasrulle/open-on-github#readme",
+    "bugs": {
+        "url": "https://github.com/gasrulle/open-on-github/issues"
+    },
+    "galleryBanner": {
+        "color": "#2b2d42",
+        "theme": "dark"
+    },
+    "engines": {
+        "vscode": "^1.103.0"
+    },
+    "categories": [
+        "SCM Providers"
+    ],
+    "keywords": [
+        "github",
+        "git",
+        "source control",
+        "pull requests",
+        "actions",
+        "open on github",
+        "open in github"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "extensionDependencies": [
+        "vscode.git"
+    ],
+    "main": "./dist/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "openOnGithub.openCode",
+                "title": "Code"
+            },
+            {
+                "command": "openOnGithub.openPullRequests",
+                "title": "Pull Requests"
+            },
+            {
+                "command": "openOnGithub.openActions",
+                "title": "Actions"
+            }
+        ],
+        "submenus": [
+            {
+                "id": "openOnGithub.githubMenu",
+                "label": "GitHub",
+                "icon": "$(github)"
+            }
+        ],
+        "menus": {
+            "scm/title": [
+                {
+                    "submenu": "openOnGithub.githubMenu",
+                    "when": "scmProvider == git && openOnGithub.isGitHub",
+                    "group": "navigation"
+                }
+            ],
+            "openOnGithub.githubMenu": [
+                {
+                    "command": "openOnGithub.openCode",
+                    "group": "1_github@1"
+                },
+                {
+                    "command": "openOnGithub.openPullRequests",
+                    "group": "1_github@2"
+                },
+                {
+                    "command": "openOnGithub.openActions",
+                    "group": "1_github@3"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "compile": "npm run check-types && npm run lint && node esbuild.js",
+        "watch": "npm-run-all -p watch:*",
+        "watch:esbuild": "node esbuild.js --watch",
+        "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+        "package": "npm run check-types && npm run lint && node esbuild.js --production",
+        "vscode:prepublish": "npm run package",
+        "check-types": "tsc --noEmit",
+        "lint": "eslint src",
+        "vsce:package": "npm install && node scripts/package.js"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.103.0",
+        "@types/node": "22.x",
+        "typescript": "^5.9.3",
+        "esbuild": "^0.27.2",
+        "npm-run-all": "^4.1.5",
+        "eslint": "^9.39.2",
+        "typescript-eslint": "^8.54.0",
+        "@vscode/vsce": "^3.0.0"
+    }
+}
