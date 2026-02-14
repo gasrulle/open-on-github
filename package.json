@@ -2,7 +2,7 @@
     "name": "open-on-github-scm",
     "displayName": "Open on GitHub SCM",
     "description": "Quickly open your GitHub repository's Code, Pull Requests, and Actions pages directly from the Source Control view.",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "publisher": "Gasrulle",
     "icon": "resources/icon.png",
     "license": "MIT",
