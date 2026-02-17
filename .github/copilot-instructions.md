@@ -20,6 +20,7 @@
 open-on-github/
 ├── .github/              # GitHub config (this file)
 ├── .vscode/              # VS Code workspace settings
+│   ├── extensions.json   # Recommended extensions for contributors
 │   ├── launch.json       # Extension Host debug config
 │   └── tasks.json        # Watch & package tasks
 ├── resources/            # Extension icon assets (icon.png, icon.svg, hero.png)
@@ -48,7 +49,7 @@ open-on-github/
 | Create VSIX | `npm run vsce:package` |
 | Debug extension | Press F5 (launches Extension Host via `launch.json`) |
 
-The default build task in VS Code runs the `watch` task, which starts both `watch:esbuild` and `watch:tsc` in parallel.
+The default build task in VS Code runs the `watch` task, which starts both `watch:esbuild` and `watch:tsc` in parallel using `npm-run-all2`.
 
 ## Architecture & Key Patterns
 
@@ -61,9 +62,14 @@ All extension logic lives in `src/extension.ts`. Keep the extension small and fo
 - **Activation:** `onStartupFinished` — the extension activates lazily after VS Code has fully started.
 - **Extension Dependency:** Depends on the built-in `vscode.git` extension to read Git remote information.
 - **Git Integration:** Uses the `vscode.git` extension API (`GitExtension` → `GitAPI` → `Repository` → `RepositoryState` → `Remote`) to extract the `origin` remote URL. The Git extension types are declared locally as interfaces in `extension.ts` (not imported from a types package).
-- **URL Conversion:** Supports SSH (`git@github.com:`), SSH with protocol prefix (`ssh://git@github.com/`), and HTTPS remote formats, converting them to `https://github.com/...` base URLs.
+- **Git API Caching:** The `GitAPI` instance is cached in a module-level variable (`cachedGitApi`) to avoid redundant `vscode.extensions.getExtension()` lookups on every command invocation.
+- **Regex Constant:** The GitHub URL regex is extracted to a module-level constant (`GITHUB_URL_RE`) to avoid recompilation on every call.
+- **Debounced Context Updates:** All event-driven context re-evaluations go through `scheduleUpdateContext()`, which debounces calls to `updateIsGitHubContext()` with a 150ms timer. This prevents redundant `setContext` calls when multiple repos change state in quick succession (e.g., during fetch). Only the initial call in `activate()` invokes `updateIsGitHubContext()` directly for instant startup.
+- **Per-Repo Disposable Tracking:** Per-repository `onDidChange` listeners are tracked in a `Map<string, Disposable>` (`repoDisposables`) keyed by `repo.rootUri.toString()`. When `onDidCloseRepository` fires, the corresponding listener is looked up, disposed, and removed from the map — preventing listener leaks on stale repository objects.
+- **URI-Based Path Comparison:** Repository matching uses `rootUri.toString()` (not `fsPath`) to ensure case-insensitive, platform-safe URI comparison.
+- **URL Conversion:** Supports SSH (`git@github.com:`), SSH with protocol prefix (`ssh://git@github.com/`), and HTTPS remote formats, converting them to `https://github.com/...` base URLs. Trailing slashes and `.git` suffixes are stripped during normalization.
 - **External Browser:** Uses `vscode.env.openExternal()` to open URLs.
-- **Commands:** Three commands registered via `vscode.commands.registerCommand`, all pushed to `context.subscriptions` for proper disposal.
+- **Commands:** Three commands registered via `vscode.commands.registerCommand`, all pushed to `context.subscriptions` for proper disposal. Command callbacks must `return` the promise from async handlers to avoid floating promises.
 
 ### Menu Contributions
 
@@ -86,17 +92,19 @@ All extension logic lives in `src/extension.ts`. Keep the extension small and fo
 - **Equality:** Use `===`/`!==` (enforced by `eqeqeq` ESLint rule).
 - **Semicolons:** Required (enforced by `semi` ESLint rule).
 - **Curly braces:** Always use curly braces for control flow (enforced by `curly` ESLint rule).
-- **No throw literals:** Only throw `Error` objects (enforced by `no-throw-literal` ESLint rule).
+- **No throw literals:** Only throw `Error` objects (enforced by `@typescript-eslint/only-throw-error` rule).
+- **No floating promises:** All promises must be awaited, returned, or explicitly voided (enforced by `@typescript-eslint/no-floating-promises` rule).
+- **Type-aware linting:** ESLint is configured with `parserOptions.projectService` for full TypeScript type information, enabling type-aware rules.
 - **Error handling:** Show user-friendly messages via `vscode.window.showWarningMessage()` or `showErrorMessage()` instead of throwing.
 - **Null safety:** Use optional chaining (`?.`) and nullish coalescing (`??`) for safe property access.
 
 ## Bundling & Packaging
 
-- esbuild bundles `src/extension.ts` → `dist/extension.js` (CommonJS, Node platform).
+- esbuild bundles `src/extension.ts` → `dist/extension.js` (CommonJS, Node platform, target `node20`).
 - `vscode` is marked as external (provided by the VS Code runtime).
 - Production builds are minified with no source maps; dev builds include source maps.
 - The VSIX is created via `scripts/package.js` using `@vscode/vsce`.
-- `.vscodeignore` excludes source files, configs, and dev artifacts from the packaged extension — only `dist/extension.js`, `resources/` assets, `package.json`, `README.md`, `CHANGELOG.md`, and `LICENSE` are included.
+- `.vscodeignore` excludes source files, configs, dev artifacts, and `.github/` from the packaged extension — only `dist/extension.js`, `resources/` assets, `package.json`, `README.md`, `CHANGELOG.md`, and `LICENSE` are included.
 
 ## Dependency Upgrade Notes
 

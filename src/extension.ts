@@ -1,7 +1,13 @@
 import * as vscode from "vscode";
 
+const GITHUB_URL_RE = /^(https:\/\/([^@/]+@)?github\.com\/|git@github\.com:|ssh:\/\/git@github\.com(:\d+)?\/)/;
+
+let cachedGitApi: GitAPI | undefined;
+const repoDisposables = new Map<string, vscode.Disposable>();
+let updateContextTimer: ReturnType<typeof setTimeout> | undefined;
+
 function isGitHubUrl(url: string): boolean {
-    return /^(https:\/\/([^@/]+@)?github\.com\/|git@github\.com:|ssh:\/\/git@github\.com(:\d+)?\/)/.test(url);
+    return GITHUB_URL_RE.test(url);
 }
 
 function hasGitHubRemote(repo: Repository): boolean {
@@ -12,6 +18,9 @@ function hasGitHubRemote(repo: Repository): boolean {
 }
 
 async function getGitApi(): Promise<GitAPI | undefined> {
+    if (cachedGitApi) {
+        return cachedGitApi;
+    }
     const gitExtension = vscode.extensions.getExtension<GitExtension>("vscode.git");
     if (!gitExtension) {
         return undefined;
@@ -19,7 +28,18 @@ async function getGitApi(): Promise<GitAPI | undefined> {
     if (!gitExtension.isActive) {
         await gitExtension.activate();
     }
-    return gitExtension.exports.getAPI(1);
+    cachedGitApi = gitExtension.exports.getAPI(1);
+    return cachedGitApi;
+}
+
+function scheduleUpdateContext(): void {
+    if (updateContextTimer) {
+        clearTimeout(updateContextTimer);
+    }
+    updateContextTimer = setTimeout(() => {
+        updateContextTimer = undefined;
+        void updateIsGitHubContext();
+    }, 150);
 }
 
 async function updateIsGitHubContext(): Promise<void> {
@@ -38,6 +58,7 @@ function getGitHubOriginUrl(repo: Repository): string | undefined {
     // Convert SSH (git@github.com:user/repo.git) or HTTPS (https://github.com/user/repo.git) to base URL
     return url
         .replace(/\.git$/, "")
+        .replace(/\/+$/, "")
         .replace(/^https:\/\/[^@/]+@github\.com\//, "https://github.com/")
         .replace(/^git@github\.com:/, "https://github.com/")
         .replace(/^ssh:\/\/git@github\.com(:\d+)?\//, "https://github.com/");
@@ -51,7 +72,8 @@ async function getGitHubUrl(sourceControl?: vscode.SourceControl): Promise<strin
 
     // If invoked from a specific repo's SCM menu, match by rootUri
     if (sourceControl?.rootUri) {
-        const repo = git.repositories.find(r => r.rootUri.fsPath === sourceControl.rootUri!.fsPath);
+        const targetPath = sourceControl.rootUri!.toString();
+        const repo = git.repositories.find(r => r.rootUri.toString() === targetPath);
         if (repo) {
             return getGitHubOriginUrl(repo);
         }
@@ -111,36 +133,39 @@ export async function activate(context: vscode.ExtensionContext) {
     const git = await getGitApi();
     if (git) {
         context.subscriptions.push(
-            git.onDidOpenRepository(() => updateIsGitHubContext()),
-            git.onDidCloseRepository(() => updateIsGitHubContext())
+            git.onDidOpenRepository(repo => {
+                const key = repo.rootUri.toString();
+                const disposable = repo.state.onDidChange(() => scheduleUpdateContext());
+                repoDisposables.set(key, disposable);
+                context.subscriptions.push(disposable);
+                scheduleUpdateContext();
+            }),
+            git.onDidCloseRepository(repo => {
+                const key = repo.rootUri.toString();
+                repoDisposables.get(key)?.dispose();
+                repoDisposables.delete(key);
+                scheduleUpdateContext();
+            })
         );
 
         // Also re-evaluate when existing repos change state (e.g. remotes added/removed)
         for (const repo of git.repositories) {
-            context.subscriptions.push(
-                repo.state.onDidChange(() => updateIsGitHubContext())
-            );
+            const key = repo.rootUri.toString();
+            const disposable = repo.state.onDidChange(() => scheduleUpdateContext());
+            repoDisposables.set(key, disposable);
+            context.subscriptions.push(disposable);
         }
-
-        // Attach the listener to any repo opened in the future
-        context.subscriptions.push(
-            git.onDidOpenRepository(repo => {
-                context.subscriptions.push(
-                    repo.state.onDidChange(() => updateIsGitHubContext())
-                );
-            })
-        );
     }
 
     context.subscriptions.push(
         vscode.commands.registerCommand("openOnGithub.openCode", (sourceControl?: vscode.SourceControl) => {
-            openGitHubPage("", sourceControl);
+            return openGitHubPage("", sourceControl);
         }),
         vscode.commands.registerCommand("openOnGithub.openPullRequests", (sourceControl?: vscode.SourceControl) => {
-            openGitHubPage("/pulls", sourceControl);
+            return openGitHubPage("/pulls", sourceControl);
         }),
         vscode.commands.registerCommand("openOnGithub.openActions", (sourceControl?: vscode.SourceControl) => {
-            openGitHubPage("/actions", sourceControl);
+            return openGitHubPage("/actions", sourceControl);
         })
     );
 }

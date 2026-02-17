@@ -1,17 +1,17 @@
 import typescriptEslint from "typescript-eslint";
 
-export default [
+export default typescriptEslint.config(
     {
         files: ["**/*.ts"],
-    },
-    {
         plugins: {
             "@typescript-eslint": typescriptEslint.plugin,
         },
         languageOptions: {
             parser: typescriptEslint.parser,
-            ecmaVersion: 2022,
-            sourceType: "module",
+            parserOptions: {
+                projectService: true,
+                tsconfigRootDir: import.meta.dirname,
+            },
         },
         rules: {
             "@typescript-eslint/naming-convention": [
@@ -21,10 +21,11 @@ export default [
                     format: ["camelCase", "PascalCase"],
                 },
             ],
+            "@typescript-eslint/no-floating-promises": "warn",
+            "@typescript-eslint/only-throw-error": "warn",
             curly: "warn",
             eqeqeq: "warn",
-            "no-throw-literal": "warn",
             semi: "warn",
         },
     },
-];
+);

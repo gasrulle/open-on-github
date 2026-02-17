@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3] - 2026-02-17
+
+### Changed
+
+- Improved performance by caching Git API reference and extracting regex constant
+- Merged duplicate `onDidOpenRepository` listeners to eliminate redundant event handling
+- Fixed floating promises in command callbacks to properly propagate errors
+- Enabled type-aware ESLint linting with `projectService` for stronger static analysis
+- Replaced abandoned `npm-run-all` with actively maintained `npm-run-all2`
+- Added explicit `noEmit` and `skipLibCheck` to TypeScript config
+- Added `target: "node20"` to esbuild config for optimized output
+- Excluded `.github/` directory from VSIX package
+- Added recommended extensions config for esbuild problem matchers
+
 ## [0.0.1] - 2026-02-13
 
 ### Added
