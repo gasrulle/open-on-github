@@ -2,7 +2,7 @@
     "name": "open-on-github-scm",
     "displayName": "Open on GitHub SCM",
     "description": "Quickly open your GitHub repository's Code, Pull Requests, and Actions pages directly from the Source Control view.",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "publisher": "Gasrulle",
     "icon": "resources/icon.png",
     "license": "MIT",
@@ -48,6 +48,10 @@
                 "title": "Code"
             },
             {
+                "command": "openOnGithub.openIssues",
+                "title": "Issues"
+            },
+            {
                 "command": "openOnGithub.openPullRequests",
                 "title": "Pull Requests"
             },
@@ -77,12 +81,16 @@
                     "group": "1_github@1"
                 },
                 {
-                    "command": "openOnGithub.openPullRequests",
+                    "command": "openOnGithub.openIssues",
                     "group": "1_github@2"
                 },
                 {
-                    "command": "openOnGithub.openActions",
+                    "command": "openOnGithub.openPullRequests",
                     "group": "1_github@3"
+                },
+                {
+                    "command": "openOnGithub.openActions",
+                    "group": "1_github@4"
                 }
             ]
         }

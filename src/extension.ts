@@ -161,6 +161,9 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand("openOnGithub.openCode", (sourceControl?: vscode.SourceControl) => {
             return openGitHubPage("", sourceControl);
         }),
+        vscode.commands.registerCommand("openOnGithub.openIssues", (sourceControl?: vscode.SourceControl) => {
+            return openGitHubPage("/issues", sourceControl);
+        }),
         vscode.commands.registerCommand("openOnGithub.openPullRequests", (sourceControl?: vscode.SourceControl) => {
             return openGitHubPage("/pulls", sourceControl);
         }),

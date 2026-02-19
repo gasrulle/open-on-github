@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.4] - 2026-02-19
+
+### Added
+
+- Added "Issues" menu item to the GitHub submenu, linking to the repository's issues page
+
 ## [0.0.3] - 2026-02-17
 
 ### Changed
