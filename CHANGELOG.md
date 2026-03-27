@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.5] - 2026-03-27
+
+### Changed
+
+- "Code" command now opens the currently checked-out branch on GitHub instead of the default branch
+
 ## [0.0.4] - 2026-02-19
 
 ### Added
