@@ -99,9 +99,22 @@ async function openGitHubPage(path: string, sourceControl?: vscode.SourceControl
     await vscode.env.openExternal(vscode.Uri.parse(`${baseUrl}${path}`));
 }
 
+function branchExistsOnOrigin(repo: Repository, branch: string): boolean {
+    // A tracking upstream on origin means the branch exists remotely.
+    if (repo.state.HEAD?.upstream?.remote === "origin" && repo.state.HEAD.upstream.name === branch) {
+        return true;
+    }
+    // Otherwise look for a remote-tracking ref refs/remotes/origin/<branch>.
+    return repo.state.refs.some(
+        ref => ref.type === RefType.RemoteHead && ref.remote === "origin" && ref.name === `origin/${branch}`
+    );
+}
+
 function getBranchPath(repo: Repository): string {
     const branch = repo.state.HEAD?.name;
-    return branch ? `/tree/${encodeURIComponent(branch)}` : "";
+    // Only link to a branch that exists on origin; otherwise GitHub returns a 404.
+    // Falling back to an empty path opens the repo root, which redirects to the default branch.
+    return branch && branchExistsOnOrigin(repo, branch) ? `/tree/${encodeURIComponent(branch)}` : "";
 }
 
 interface GitExtension {
@@ -122,10 +135,30 @@ interface Repository {
 interface Branch {
     name?: string;
     commit?: string;
+    upstream?: UpstreamRef;
+}
+
+interface UpstreamRef {
+    remote: string;
+    name: string;
+}
+
+const enum RefType {
+    Head = 0,
+    RemoteHead = 1,
+    Tag = 2,
+}
+
+interface Ref {
+    type: RefType;
+    name?: string;
+    commit?: string;
+    remote?: string;
 }
 
 interface RepositoryState {
     HEAD?: Branch;
+    refs: Ref[];
     remotes: Remote[];
     onDidChange: vscode.Event<void>;
 }

@@ -108,17 +108,26 @@ All extension logic lives in `src/extension.ts`. Keep the extension small and fo
 
 ## Dependency Upgrade Notes
 
-### ESLint v10 (as of Feb 2026)
+### ESLint v10 — completed (as of Jun 2026)
 
-- **ESLint v10.0.0** is available but **typescript-eslint does not yet support it**. The current `typescript-eslint` (v8.x) has a peer dependency of `eslint: ^8.57.0 || ^9.0.0`. An official support PR ([typescript-eslint#12057](https://github.com/typescript-eslint/typescript-eslint/pull/12057)) is in progress.
-- **Do not upgrade ESLint to v10 until typescript-eslint ships a release with v10 in its peer dependencies.** Upgrade both together when ready.
-- **This project's ESLint config is already v10-ready:** it uses flat config (`eslint.config.mjs`), no `eslint-env` comments, no JSX, no legacy `.eslintrc`, and no affected rule options.
-- Key ESLint v10 breaking changes to be aware of when upgrading:
-  - Node.js ≥ v20.19.0 required.
-  - `eslint:recommended` adds three new rules (`no-unassigned-vars`, `no-useless-assignment`, `preserve-caught-error`).
-  - Config lookup now starts from the linted file's directory (was cwd-based).
-  - Old `.eslintrc` format and `eslint-env` comments are fully removed.
-  - `FlatESLint`/`LegacyESLint` APIs removed — use `ESLint` class only.
+- **ESLint has been upgraded to v10** (`^10.6.0`). This was previously blocked because `typescript-eslint` v8.x only declared `eslint: ^8.57.0 || ^9.0.0`. As of **typescript-eslint v8.62.1**, the peer dependency is `eslint: ^8.57.0 || ^9.0.0 || ^10.0.0`, so the two were upgraded together.
+- The migration was clean — no source or config changes were needed. The flat config (`eslint.config.mjs`) was already v10-ready: no `eslint-env` comments, no JSX, no legacy `.eslintrc`, and no affected rule options.
+- ESLint v10 requires Node.js ≥ v20.19.0. Other notable v10 changes: `eslint:recommended` adds three rules (`no-unassigned-vars`, `no-useless-assignment`, `preserve-caught-error`); config lookup now starts from the linted file's directory; `.eslintrc`/`eslint-env` and `FlatESLint`/`LegacyESLint` APIs are removed.
+
+### TypeScript v6 — completed (as of Jun 2026)
+
+- **TypeScript has been upgraded to v6** (`^6.0.3`). `typescript-eslint` v8.62.1 supports it via peer `typescript: >=4.8.4 <6.1.0`. **Do not upgrade past TypeScript 6.0.x (e.g. to the 7.0 RC) until typescript-eslint widens this peer range**, or linting will break.
+- **TS 6.0 partitions ambient globals more strictly.** With `lib: ["ES2022"]` (no DOM), Node globals like `setTimeout`/`clearTimeout` were no longer auto-resolved and `tsc` failed with `Cannot find name 'setTimeout'`. **Fix: `tsconfig.json` now sets `"types": ["node"]`** to explicitly load `@types/node` globals. Keep this entry — do not remove it.
+
+### Version-pinning policy for `@types/*`
+
+- **`@types/vscode` is pinned to `^1.103.0` to match `engines.vscode`.** Do NOT bump it above the declared minimum engine, or the extension may compile against APIs unavailable in the minimum supported VS Code.
+- **`@types/node` is pinned to `22.x` to match the Node version bundled with VS Code** (≈Node 22 for the 1.103 engine). Do NOT chase the latest `@types/node` major (e.g. 26.x) — it would expose Node APIs newer than the runtime.
+
+### `@vscode/vsce` transitive vulnerabilities
+
+- `npm audit` may report vulnerabilities in transitive deps of `@vscode/vsce` (e.g. `undici`, `lodash`, `shell-quote`, `tmp`). These are **dev/packaging-only** and never ship in the VSIX (which contains only `dist/extension.js` + assets). `npm audit fix` resolves them without breaking the build.
+
 
 ## Maintaining These Instructions
 
