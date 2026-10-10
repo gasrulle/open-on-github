@@ -1,0 +1,24 @@
+name: Question
+description: Ask about configuration or supported behavior.
+title: "[Question]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the [README](https://github.com/gasrulle/open-on-github#readme) and [existing issues](https://github.com/gasrulle/open-on-github/issues) first.
+        Use a bug report for broken behavior or a feature request for a new capability.
+        Do not include credentials or private repository information.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: If relevant, include your extension version, workspace layout, and sanitized origin URL format.

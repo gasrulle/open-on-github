@@ -1,0 +1,158 @@
+name: Bug Report
+description: A GitHub menu or command is not working as expected.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please report one bug per issue. Use the feature request form for new capabilities.
+        Do not include credentials, access tokens, or private repository names. Replace sensitive parts of remote URLs and screenshots before sharing.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I have searched the [existing issues](https://github.com/gasrulle/open-on-github/issues) for duplicates.
+          required: true
+        - label: I am using the latest version of Open on GitHub SCM.
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What should have happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Include which repository was selected and where you invoked the command.
+      placeholder: |
+        1. Open a workspace containing ...
+        2. Select ... in Source Control
+        3. Open the GitHub submenu on ... and choose ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-component
+    attributes:
+      label: Affected Component
+      options:
+        - GitHub menu visibility or activation
+        - Repository selection or repository picker
+        - Remote URL detection or conversion
+        - Code page or branch selection
+        - Issues, Pull Requests, or Actions pages
+        - External browser opening
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: invocation
+    attributes:
+      label: Command Entry Point
+      options:
+        - GitHub submenu on a repository row
+        - GitHub submenu in the Source Control view title bar
+        - Command Palette
+        - Keyboard shortcut or another extension
+        - Not applicable (menu missing or activation failure)
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: workspace
+    attributes:
+      label: Workspace Layout
+      options:
+        - One Git repository
+        - Multiple Git repositories in one folder
+        - Multi-root workspace with multiple Git repositories
+        - No Git repositories detected
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: repository-details
+    attributes:
+      label: Repository and Remote Details
+      description: |
+        If relevant, provide sanitized origin URL formats (HTTPS, git@github.com:, or ssh://git@github.com/), selected repositories, and expected versus actual destination URLs.
+        For Code page issues, say whether the current branch exists on origin. Never include embedded credentials or private names.
+      placeholder: |
+        Repository A origin: git@github.com:example/repo-a.git
+        Repository B origin: https://github.com/example/repo-b.git
+        Selected repository: B
+        Expected URL: ...
+        Actual URL: ...
+
+  - type: input
+    id: vscode-version
+    attributes:
+      label: VS Code Version
+      placeholder: "For example: 1.103.0"
+    validations:
+      required: true
+
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension Version
+      description: See Open on GitHub SCM in the Extensions view.
+      placeholder: "For example: 0.0.8"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Operating System
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Remote Development Environment
+      description: If applicable, specify WSL, SSH, Dev Containers, Codespaces, or a browser-based editor.
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output
+      description: Paste relevant errors from the Git or Log (Extension Host) Output channels. Remove sensitive information.
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If helpful, show the repository selection, menu, or warning. Hide sensitive information.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Include any workaround or other information that helps reproduce the bug.

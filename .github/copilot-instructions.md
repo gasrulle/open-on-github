@@ -146,6 +146,7 @@ All extension logic lives in `src/extension.ts`. Keep the extension small and fo
 ## Contributing Guidelines
 
 - Keep the extension lightweight — avoid adding heavy dependencies.
+- GitHub issue forms live in `.github/ISSUE_TEMPLATE/`: bug reports capture workspace layout, command entry point, repository/remote details, and versions; feature requests and questions use separate forms. Blank issues are disabled. Keep forms aligned with supported commands and repository-selection behavior, and never request credentials or private repository information.
 - Any new command must be registered in both `package.json` (`contributes.commands`) and `extension.ts` (`activate`).
 - Update `CHANGELOG.md` for every user-facing change.
 - Run `npm run compile` before committing to ensure type checks and lint pass.

@@ -41,3 +41,7 @@ This extension has no configurable settings.
 ## License
 
 [MIT](LICENSE)
+
+## Reporting Issues
+
+Use the [issue forms](https://github.com/gasrulle/open-on-github/issues/new/choose) to report a bug, request a feature, or ask a question. Keep separate bugs and feature requests in separate issues. For bugs, include your VS Code and extension versions, workspace layout, command entry point, and reproduction steps. Remove credentials and private repository information from remote URLs, logs, and screenshots.

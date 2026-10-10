@@ -1,0 +1,62 @@
+name: Feature Request
+description: Suggest a new GitHub navigation capability or improvement.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please suggest one feature per issue. Use the bug report form for existing behavior that is broken.
+        Do not include credentials or private repository information.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I have searched the [existing issues](https://github.com/gasrulle/open-on-github/issues) for duplicate requests.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Motivation
+      description: What problem would this feature solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the desired behavior and how you would use it.
+      placeholder: "For example: add a command to copy the selected repository's GitHub URL."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-component
+    attributes:
+      label: Affected Component
+      options:
+        - GitHub submenu or commands
+        - Repository selection or repository picker
+        - Remote URLs or GitHub host support
+        - Code page or branch links
+        - Issues, Pull Requests, or Actions links
+        - URL copying or sharing
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions Considered
+      description: Describe any alternatives or workarounds.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Include examples or sanitized screenshots if helpful.
