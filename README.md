@@ -5,26 +5,30 @@
 
 ![Open on GitHub](resources/hero.png)
 
-Quickly open your GitHub repository's **Code**, **Pull Requests**, and **Actions** pages directly from the Source Control view in VS Code.
+Quickly open your GitHub repository's **Code**, **Issues**, **Pull Requests**, and **Actions** pages directly from the Source Control view in VS Code.
 
 ## Features
 
 - Adds a **GitHub** submenu (with the `$(github)` icon) to the Source Control title bar
-- One-click access to three key GitHub pages:
-  - **Code** — opens the repository home page
+- One-click access to four key GitHub pages:
+  - **Code** — opens the current branch if it exists on `origin`, otherwise the repository home page
+  - **Issues** — opens the issues tab
   - **Pull Requests** — opens the pull requests tab
   - **Actions** — opens the GitHub Actions tab
 - Automatically reads the `origin` remote URL from your repository
 - Supports both SSH and HTTPS remote formats
+- Supports multi-repository workspaces using the selected Source Control repository, with a repository picker when the choice is ambiguous
 
 ## Usage
 
 1. Open a project that has a GitHub remote configured
 2. Navigate to the **Source Control** view
 3. Click the **GitHub** icon in the title bar
-4. Select **Code**, **Pull Requests**, or **Actions**
+4. Select **Code**, **Issues**, **Pull Requests**, or **Actions**
 
 Your default browser will open the corresponding GitHub page.
+
+In a workspace with multiple repositories, a repository's own GitHub menu always targets that repository. Commands without repository context use the selected Source Control repository. If multiple GitHub repositories are selected, or none is selected and multiple GitHub repositories are available, you will be prompted to choose one. A selected repository without a GitHub `origin` shows a warning instead of opening a different repository.
 
 ## Requirements
 

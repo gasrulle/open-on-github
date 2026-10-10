@@ -2,7 +2,7 @@
     "name": "open-on-github-scm",
     "displayName": "Open on GitHub SCM",
     "description": "Quickly open your GitHub repository's Code, Pull Requests, and Actions pages directly from the Source Control view.",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "publisher": "Gasrulle",
     "icon": "resources/icon.png",
     "license": "MIT",
@@ -104,6 +104,7 @@
         "vscode:prepublish": "npm run package",
         "check-types": "tsc --noEmit",
         "lint": "eslint src",
+        "test": "node --test src/test/extension.test.cjs",
         "vsce:package": "npm install && node scripts/package.js"
     },
     "devDependencies": {

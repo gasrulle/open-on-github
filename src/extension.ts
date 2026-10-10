@@ -11,10 +11,7 @@ function isGitHubUrl(url: string): boolean {
 }
 
 function hasGitHubRemote(repo: Repository): boolean {
-    return repo.state.remotes.some(r => {
-        const url = r.fetchUrl ?? r.pushUrl;
-        return url !== undefined && isGitHubUrl(url);
-    });
+    return getGitHubOriginUrl(repo) !== undefined;
 }
 
 async function getGitApi(): Promise<GitAPI | undefined> {
@@ -67,32 +64,43 @@ function getGitHubOriginUrl(repo: Repository): string | undefined {
 async function findGitHubRepo(sourceControl?: vscode.SourceControl): Promise<Repository | undefined> {
     const git = await getGitApi();
     if (!git) {
+        await vscode.window.showWarningMessage("The Git extension is unavailable.");
         return undefined;
     }
 
-    // If invoked from a specific repo's SCM menu, match by rootUri
+    let candidates: Repository[];
     if (sourceControl?.rootUri) {
-        const targetPath = sourceControl.rootUri!.toString();
-        const repo = git.repositories.find(r => r.rootUri.toString() === targetPath);
-        if (repo && getGitHubOriginUrl(repo)) {
-            return repo;
-        }
+        const targetPath = sourceControl.rootUri.toString();
+        candidates = git.repositories.filter(r => r.rootUri.toString() === targetPath);
+    } else {
+        // The global SCM toolbar supplies no repository context in multi-repo workspaces.
+        const selected = git.repositories.filter(r => r.ui.selected);
+        candidates = selected.length > 0 ? selected : git.repositories;
     }
 
-    // Fallback: find the first repo with a GitHub origin remote
-    for (const repo of git.repositories) {
-        if (getGitHubOriginUrl(repo)) {
-            return repo;
-        }
+    const githubRepos = candidates.filter(hasGitHubRemote);
+    if (githubRepos.length === 0) {
+        await vscode.window.showWarningMessage("Could not determine GitHub origin remote URL for the selected repository.");
+        return undefined;
+    }
+    if (githubRepos.length === 1) {
+        return githubRepos[0];
     }
 
-    return undefined;
+    const choice = await vscode.window.showQuickPick(
+        githubRepos.map(repo => ({
+            label: getGitHubOriginUrl(repo)!,
+            description: repo.rootUri.fsPath,
+            repo,
+        })),
+        { placeHolder: "Select a repository to open on GitHub" }
+    );
+    return choice?.repo;
 }
 
 async function openGitHubPage(path: string, sourceControl?: vscode.SourceControl): Promise<void> {
     const repo = await findGitHubRepo(sourceControl);
     if (!repo) {
-        vscode.window.showWarningMessage("Could not determine GitHub remote URL.");
         return;
     }
     const baseUrl = getGitHubOriginUrl(repo)!;
@@ -130,6 +138,7 @@ interface GitAPI {
 interface Repository {
     readonly rootUri: vscode.Uri;
     state: RepositoryState;
+    readonly ui: { readonly selected: boolean };
 }
 
 interface Branch {
@@ -205,7 +214,6 @@ export async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand("openOnGithub.openCode", async (sourceControl?: vscode.SourceControl) => {
             const repo = await findGitHubRepo(sourceControl);
             if (!repo) {
-                vscode.window.showWarningMessage("Could not determine GitHub remote URL.");
                 return;
             }
             const baseUrl = getGitHubOriginUrl(repo)!;

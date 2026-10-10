@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.0.8] - 2026-10-10
+
+### Fixed
+
+- GitHub commands now use the selected Source Control repository in multi-repository workspaces instead of always opening the first GitHub repository
+- Repository-specific menus no longer silently redirect to another repository when their repository has no GitHub `origin`
+
+### Changed
+
+- Commands prompt for a repository when multiple GitHub repositories are eligible and the choice is ambiguous
+
 ## [0.0.6] - 2026-06-30
 
 ### Fixed

@@ -45,6 +45,7 @@ open-on-github/
 | Watch mode (esbuild + tsc in parallel) | `npm run watch` |
 | Type check only | `npm run check-types` |
 | Lint | `npm run lint` |
+| Unit tests | `npm test` |
 | Production bundle | `npm run package` |
 | Create VSIX | `npm run vsce:package` |
 | Debug extension | Press F5 (launches Extension Host via `launch.json`) |
@@ -67,14 +68,15 @@ All extension logic lives in `src/extension.ts`. Keep the extension small and fo
 - **Debounced Context Updates:** All event-driven context re-evaluations go through `scheduleUpdateContext()`, which debounces calls to `updateIsGitHubContext()` with a 150ms timer. This prevents redundant `setContext` calls when multiple repos change state in quick succession (e.g., during fetch). Only the initial call in `activate()` invokes `updateIsGitHubContext()` directly for instant startup.
 - **Per-Repo Disposable Tracking:** Per-repository `onDidChange` listeners are tracked in a `Map<string, Disposable>` (`repoDisposables`) keyed by `repo.rootUri.toString()`. When `onDidCloseRepository` fires, the corresponding listener is looked up, disposed, and removed from the map — preventing listener leaks on stale repository objects.
 - **URI-Based Path Comparison:** Repository matching uses `rootUri.toString()` (not `fsPath`) to ensure case-insensitive, platform-safe URI comparison.
+- **Multi-Repository Selection:** A repository-specific SCM menu's `rootUri` is authoritative. VS Code 1.103's global SCM toolbar passes no repository context when multiple repositories are visible (`SCMViewPane.getActionsContext`), so commands without context use `Repository.ui.selected` from the Git API. When none is selected, consider all repositories; prompt with a QuickPick if multiple GitHub origins are eligible. Never redirect an explicit or sole selected non-GitHub repository to another repository. Picker cancellation is a normal no-op.
 - **URL Conversion:** Supports SSH (`git@github.com:`), SSH with protocol prefix (`ssh://git@github.com/`), and HTTPS remote formats, converting them to `https://github.com/...` base URLs. Trailing slashes and `.git` suffixes are stripped during normalization.
 - **External Browser:** Uses `vscode.env.openExternal()` to open URLs.
-- **Commands:** Three commands registered via `vscode.commands.registerCommand`, all pushed to `context.subscriptions` for proper disposal. Command callbacks must `return` the promise from async handlers to avoid floating promises.
+- **Commands:** Four commands (Code, Issues, Pull Requests, Actions) registered via `vscode.commands.registerCommand`, all pushed to `context.subscriptions` for proper disposal. Command callbacks must `return` the promise from async handlers to avoid floating promises.
 
 ### Menu Contributions
 
 - The extension contributes a **submenu** (`openOnGithub.githubMenu`) to the `scm/title` menu area.
-- The submenu is shown only when `scmProvider == git`.
+- The submenu is shown only when `scmProvider == git && openOnGithub.isGitHub`. The custom context checks for a GitHub `origin`, matching the commands' remote selection.
 - Commands are placed in a group `1_github@N` to control ordering within the submenu.
 
 ### Naming Conventions
@@ -135,10 +137,11 @@ All extension logic lives in `src/extension.ts`. Keep the extension small and fo
 
 ## Testing
 
-No test framework is currently set up. If tests are added:
-- Use the `@vscode/test-electron` runner for integration tests.
-- Place test files in a `src/test/` directory.
-- Add a `test` npm script to `package.json`.
+- Run `npm test` for unit regressions in `src/test/extension.test.cjs`. These use Node's built-in test runner and an in-memory esbuild bundle with a mocked VS Code API; no additional dependencies or build output are required.
+- Unit tests verify command behavior and repository selection, not actual VS Code menu argument forwarding.
+- For release UI verification, load the extracted production VSIX in an isolated VS Code profile, test every submenu action in two real repositories, and verify a command without SCM arguments follows the selected repository. Also check that a non-GitHub repository warns without redirecting. Intercept only the external-browser handoff to assert the exact URLs without opening browser tabs.
+- On macOS, keep temporary `--user-data-dir` paths short (Unix-domain sockets have a 103-character limit). Playwright can automate context menus when the isolated profile sets `"window.menuStyle": "custom"`; do not change the user's settings. Remove session-local VS Code, Node, drivers, profiles, and caches after testing and publishing.
+- Use the `@vscode/test-electron` runner if integration tests are added.
 
 ## Contributing Guidelines
 
