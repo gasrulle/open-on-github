@@ -38,6 +38,14 @@ In a workspace with multiple repositories, a repository's own GitHub menu always
 
 This extension has no configurable settings.
 
+## Development
+
+Use Node.js `^22.22.2 || ^24.15.0 || >=26.0.0` and npm 10 or newer for the development and packaging tools. This does not change the extension's VS Code 1.103 minimum.
+
+Run `npm ci`, then `npm run compile` and `npm test`. Use `npm run watch` during development and `npm run vsce:package` to create a production VSIX.
+
+TypeScript stays on 6.0.x until `typescript-eslint` supports TypeScript 7. VS Code typings stay on 1.103.x and Node typings on 22.x to avoid compiling against APIs newer than the minimum supported runtime.
+
 ## License
 
 [MIT](LICENSE)

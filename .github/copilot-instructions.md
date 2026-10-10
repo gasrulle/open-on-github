@@ -110,6 +110,14 @@ All extension logic lives in `src/extension.ts`. Keep the extension small and fo
 
 ## Dependency Upgrade Notes
 
+### October 2026 dependency refresh
+
+- Development and packaging require Node.js `^22.22.2 || ^24.15.0 || >=26.0.0` and npm >=10, matching npm-run-all2 9. The ESM-only runner is used via its CLI, so the CommonJS extension and build scripts do not need conversion.
+- Current tool versions: ESLint 10.12.0, typescript-eslint 8.71.1, esbuild 0.28.2, npm-run-all2 9.0.3, and @vscode/vsce 4.0.0.
+- The deprecated `typescriptEslint.config(...)` helper has been replaced with `defineConfig(...)` from `eslint/config`; lint rules are unchanged.
+- TypeScript 7.0.2 is stable, but typescript-eslint 8.71.1 still declares `typescript: >=4.8.4 <6.1.0` and rejects TypeScript 7. Keep TypeScript on `~6.0.3` until the parser supports a newer version.
+- @vscode/vsce 4 requires Node >=22 and replaces legacy dependencies (including keytar, glob, form-data, and chalk). Its credential store uses `@napi-rs/keyring` and offers prompted migration of legacy PATs. Publishing must still use macOS Keychain; do not permit a plaintext fallback or change Keychain access controls.
+
 ### ESLint v10 — completed (as of Jun 2026)
 
 - **ESLint has been upgraded to v10** (`^10.6.0`). This was previously blocked because `typescript-eslint` v8.x only declared `eslint: ^8.57.0 || ^9.0.0`. As of **typescript-eslint v8.62.1**, the peer dependency is `eslint: ^8.57.0 || ^9.0.0 || ^10.0.0`, so the two were upgraded together.
@@ -118,17 +126,17 @@ All extension logic lives in `src/extension.ts`. Keep the extension small and fo
 
 ### TypeScript v6 — completed (as of Jun 2026)
 
-- **TypeScript has been upgraded to v6** (`^6.0.3`). `typescript-eslint` v8.62.1 supports it via peer `typescript: >=4.8.4 <6.1.0`. **Do not upgrade past TypeScript 6.0.x (e.g. to the 7.0 RC) until typescript-eslint widens this peer range**, or linting will break.
+- **TypeScript has been upgraded to v6** (`~6.0.3`). `typescript-eslint` supports it via peer `typescript: >=4.8.4 <6.1.0`. **Do not upgrade past TypeScript 6.0.x until typescript-eslint widens this peer range**, or linting will break.
 - **TS 6.0 partitions ambient globals more strictly.** With `lib: ["ES2022"]` (no DOM), Node globals like `setTimeout`/`clearTimeout` were no longer auto-resolved and `tsc` failed with `Cannot find name 'setTimeout'`. **Fix: `tsconfig.json` now sets `"types": ["node"]`** to explicitly load `@types/node` globals. Keep this entry — do not remove it.
 
 ### Version-pinning policy for `@types/*`
 
-- **`@types/vscode` is pinned to `^1.103.0` to match `engines.vscode`.** Do NOT bump it above the declared minimum engine, or the extension may compile against APIs unavailable in the minimum supported VS Code.
+- **`@types/vscode` is restricted to `~1.103.0` to match `engines.vscode`.** A caret range previously allowed the lockfile to drift to 1.109.0; use a tilde range to stay on 1.103.x. Do NOT bump it above the declared minimum engine, or the extension may compile against APIs unavailable in the minimum supported VS Code.
 - **`@types/node` is pinned to `22.x` to match the Node version bundled with VS Code** (≈Node 22 for the 1.103 engine). Do NOT chase the latest `@types/node` major (e.g. 26.x) — it would expose Node APIs newer than the runtime.
 
 ### `@vscode/vsce` transitive vulnerabilities
 
-- `npm audit` may report vulnerabilities in transitive deps of `@vscode/vsce` (e.g. `undici`, `lodash`, `shell-quote`, `tmp`). These are **dev/packaging-only** and never ship in the VSIX (which contains only `dist/extension.js` + assets). `npm audit fix` resolves them without breaking the build.
+- `npm audit` may report vulnerabilities in transitive deps of `@vscode/vsce`. These are **dev/packaging-only** and never ship in the VSIX (which contains only `dist/extension.js` + assets). Prefer upstream updates within supported ranges; inspect audit results and validate any fix rather than assuming every advisory can be resolved without breaking changes.
 
 
 ## Maintaining These Instructions

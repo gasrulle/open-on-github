@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Updated development and packaging dependencies, including npm-run-all2 9 and @vscode/vsce 4
+- Replaced the deprecated typescript-eslint configuration helper with ESLint's `defineConfig`
+- Restricted VS Code typings to 1.103.x and TypeScript to the supported 6.0.x line
+
 ## [0.0.8] - 2026-10-10
 
 ### Fixed

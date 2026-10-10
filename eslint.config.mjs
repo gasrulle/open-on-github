@@ -1,6 +1,7 @@
+import { defineConfig } from "eslint/config";
 import typescriptEslint from "typescript-eslint";
 
-export default typescriptEslint.config(
+export default defineConfig(
     {
         files: ["**/*.ts"],
         plugins: {
